@@ -2,17 +2,48 @@
  * Created by wang on 15-3-3.
  */
 
-var app=require('express')();
-var http=require('http').Server(app);
+var express=require('express');
+var app=express();
+var http=require('http');
+var server=http.createServer(app);
+var io=require('socket.io').listen(server);
 
-/*app.get("/", function (req, res) {
-    res.send('<h1>hello world !!!!</h1>');
-});*/
+var users=[];
 
-app.get('/',function(req,res){
-    res.sendFile(__dirname+'/public/index.html');
+app.use('/',express.static(__dirname+'/public'));
+
+server.listen(3000, function (err) {
+    if(err){
+        console.log(err)
+    }else{
+        console.log("server start")
+    }
 });
 
-http.listen(3000,function(){
-    console.log('listening on :3000');
+io.on('connection', function (socket) {
+    console.log('io connection...');
+
+    //nickname
+    socket.on('login', function (nickname) {
+        if(users.indexOf(nickname) > -1){
+            socket.emit('nickExisted');
+            console.log('nick name has been used:'+nickname);
+        }else{
+            socket.userIndex=users.length;
+            socket.nickname=nickname;
+            users.push(nickname);
+            socket.emit('loginsuccess');
+            console.log("login success,user:"+nickname);
+            io.sockets.emit('system',nickname,users.length,'login');
+        }
+    });
+
+    socket.on('disconnect',function(){
+        users.splice(socket.userIndex,1);
+        socket.broadcast.emit('system',socket.nickname,users.length,'logout');
+    });
+
 });
+
+
+
