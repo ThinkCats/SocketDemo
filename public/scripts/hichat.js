@@ -53,7 +53,7 @@ HiChat.prototype = {
         this.socket.on('system', function (nickname,userCount,type) {
             var msg='user :'+nickname+'  '+ (type == 'login' ? 'joined':' left');
             that._displayNewMsg(nickname,msg,'red');
-            document.getElementById('status').textContent= userCount +(userCount >1 ? 'users':'user') +'online' ;
+            document.getElementById('status').textContent= userCount+" " +(userCount >1 ? 'users':'user') +' online' ;
         });
     },
 
